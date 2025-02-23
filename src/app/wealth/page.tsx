@@ -1,6 +1,14 @@
 'use client'
+import { queryHistoricalGraphQL } from '@/utils/queryHistoricalGraphQL'
 import { TypeAnimation } from 'react-type-animation'
-export default function wealthPage() {
+export default async function wealthPage() {
+  const morphoData = await queryHistoricalGraphQL({
+    startTimestamp: 1740236400,
+    endTimestamp: 1740307605,
+    interval: 'HOUR',
+  })
+
+  console.log(morphoData)
   return (
     <>
       <div className="w-screen h-screen flex items-center justify-center">
