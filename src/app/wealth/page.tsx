@@ -4,6 +4,7 @@ import { useHistoricalGraphQL } from '@/app/(hooks)/useHistoricalGraphQL'
 import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import HistoricalBalanceChart from '../(components)/HistoricalBalanceChart'
+import CurrentBalanceBox from '../(components)/CurrentBalanceBox'
 
 type morphoDataInterface = {
   userByAddress: {
@@ -85,9 +86,14 @@ export default function WealthPage() {
     }
   }, [newDataFormat])
 
-  console.log(newDataFormat)
+  const currentBalance = useMemo(() => {
+    if (!morphoData) return 0
+    return morphoData.userByAddress.vaultPositions[1]?.assetsUsd
+  }, [morphoData])
+
+  // console.log(newDataFormat)
   return (
-    <div className="w-screen h-screen flex items-center justify-center">
+    <div className="w-screen h-screen flex items-center justify-center gap-x-10">
       <div className="border rounded p-10 w-5/12 h-2/5">
         {isShowing ? (
           <HistoricalBalanceChart
@@ -95,7 +101,7 @@ export default function WealthPage() {
             minYValue={minYValue}
           />
         ) : (
-          <div className="flex justify-center items-center h-full font-mono">
+          <div className="flex justify-center items-center h-full font-mono animate-slowfade">
             Loading...
           </div>
         )}
@@ -103,10 +109,10 @@ export default function WealthPage() {
       <div className="border rounded p-10 w-2/12 h-2/12">
         {isShowing ? (
           <div className="text-center font-mono font-semibold text-lg">
-            Current Balance
+            <CurrentBalanceBox currentBalance={currentBalance} />
           </div>
         ) : (
-          <div className="flex justify-center items-center h-full font-mono">
+          <div className="flex justify-center items-center font-mono">
             Loading...
           </div>
         )}

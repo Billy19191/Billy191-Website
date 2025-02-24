@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, memo } from 'react'
 import {
   Area,
   AreaChart,
@@ -34,7 +34,7 @@ const HistoricalBalanceChart: FC<iHistoricalBalanceChart> = ({
 
   return (
     <>
-      <div className="text-center font-mono font-semibold text-lg">
+      <div className="text-center font-mono font-semibold text-lg animate-slowfade">
         Historical Balance
       </div>
       <ResponsiveContainer width="100%" height="100%">
@@ -51,15 +51,6 @@ const HistoricalBalanceChart: FC<iHistoricalBalanceChart> = ({
           <XAxis
             dataKey="x"
             className="font-mono text-sm"
-            ticks={[
-              groupedData[0].x,
-              ...groupedData
-                .filter(
-                  (_, index) => index % Math.floor(groupedData.length / 6) === 0
-                )
-                .map((item) => item.x),
-              groupedData[groupedData.length - 1].x,
-            ]}
             tickFormatter={(tick) => {
               const date = new Date(tick)
               return date.toLocaleDateString('en-US', {
@@ -68,6 +59,7 @@ const HistoricalBalanceChart: FC<iHistoricalBalanceChart> = ({
               })
             }}
             interval="preserveEnd"
+            tick={{ dy: 15 }}
           />
           <YAxis
             domain={[minYValue, 'auto']}
@@ -78,6 +70,7 @@ const HistoricalBalanceChart: FC<iHistoricalBalanceChart> = ({
               position: 'insideLeft',
               dx: -30,
             }}
+            tick={{ dx: -10 }}
           />
           <Tooltip
             cursor={{
@@ -88,16 +81,10 @@ const HistoricalBalanceChart: FC<iHistoricalBalanceChart> = ({
             contentStyle={{
               borderRadius: '4px',
               padding: '12px',
+              fontFamily: 'monospace',
             }}
-            formatter={(value, _, props) => [
+            formatter={(value) => [
               `${parseFloat(value as string).toFixed(2)} USDC`,
-              new Date(props.payload.x).toLocaleString('en-US', {
-                day: 'numeric',
-                month: 'short',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-              }),
             ]}
           />
           <Area
@@ -106,7 +93,9 @@ const HistoricalBalanceChart: FC<iHistoricalBalanceChart> = ({
             strokeWidth={1.5}
             fill="url(#colorRed)"
             // fillOpacity={0.4}
-            isAnimationActive={false}
+            isAnimationActive={true}
+            animationDuration={500}
+            animationEasing="ease-in-out"
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -114,4 +103,4 @@ const HistoricalBalanceChart: FC<iHistoricalBalanceChart> = ({
   )
 }
 
-export default HistoricalBalanceChart
+export default memo(HistoricalBalanceChart)
