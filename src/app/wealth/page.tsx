@@ -88,7 +88,7 @@ export default function WealthPage() {
 
   const currentBalance = useMemo(() => {
     if (!morphoData) return 0
-    return morphoData.userByAddress.vaultPositions[1]?.assetsUsd
+    return morphoData.userByAddress.vaultPositions[1]?.assets / 1000000
   }, [morphoData])
 
   // console.log(newDataFormat)

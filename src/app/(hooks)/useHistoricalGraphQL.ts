@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { client } from '@/app/layout'
+import { client } from '@/app/(provider)/ApolloProvider'
 import { gql } from '@apollo/client'
 
 type TimeseriesOptions = {
