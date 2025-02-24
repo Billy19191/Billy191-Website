@@ -1,63 +1,116 @@
 'use client'
 
-import { queryHistoricalGraphQL } from '@/utils/queryHistoricalGraphQL'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { TypeAnimation } from 'react-type-animation'
+import { useHistoricalGraphQL } from '@/app/(hooks)/useHistoricalGraphQL'
+import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
+import HistoricalBalanceChart from '../(components)/HistoricalBalanceChart'
+
+type morphoDataInterface = {
+  userByAddress: {
+    address: string
+    marketPositions: {
+      market: {
+        address: string
+        name: string
+      }
+      position: number
+      positionUsd: number
+    }[]
+    vaultPositions: {
+      vault: {
+        address: string
+        name: string
+      }
+      assets: number
+      assetsUsd: number
+      shares: string
+      historicalState: {
+        assets: {
+          x: number
+          y: number
+        }[]
+      }
+    }[]
+  }
+}
+
+export type newDataFormatInterface = {
+  x: number
+  y: number
+}
+
 export default function WealthPage() {
-  const [morphoData, setMorphoData] = useState()
-  const morphoDataRef = useRef(morphoData)
-  const memoizedMorphoData = useMemo(() => morphoData, [morphoData])
+  const [morphoData, setMorphoData] = useState<morphoDataInterface | undefined>(
+    undefined
+  )
+  const [isShowing, setIsShowing] = useState(false)
+
+  const { data, loading, error } = useHistoricalGraphQL({
+    startTimestamp: dayjs().subtract(1, 'month').unix(),
+    endTimestamp: dayjs().unix(),
+    interval: 'HOUR',
+  })
 
   useEffect(() => {
-    queryHistoricalGraphQL({
-      startTimestamp: 1740236400,
-      endTimestamp: 1740330582,
-      interval: 'HOUR',
-    }).then((data) => {
+    if (!loading && !error && data) {
       setMorphoData(data)
-    })
-  }, [])
+    }
+  }, [data, loading, error])
+
+  const newDataFormat: { x: string; y: number }[] = useMemo(() => {
+    if (!morphoData) return []
+
+    const cleanData = morphoData.userByAddress.vaultPositions[1]
+      ?.historicalState || { assets: [] }
+    return cleanData.assets
+      .map((asset: newDataFormatInterface) => ({
+        x: dayjs.unix(asset.x).format('YYYY-MM-DD HH:mm:ss'),
+        y: asset.y / 1000000,
+      }))
+      .filter((asset: { x: string; y: number }) => asset.y > 0)
+      .sort((a: { x: string; y: number }, b: { x: string; y: number }) =>
+        a.x.localeCompare(b.x)
+      )
+  }, [morphoData])
+
+  const minYValue = useMemo(() => {
+    return newDataFormat.length > 0
+      ? Math.min(...newDataFormat.map((d) => d.y))
+      : 0
+  }, [newDataFormat])
 
   useEffect(() => {
-    if (morphoData) {
-      const cleanData =
-        memoizedMorphoData?.userByAddress?.vaultPositions[1].historicalState
-      cleanData.assets.map((asset) => {
-        console.log({
-          // x: new Date(asset.x * 1000).toLocaleString(),
-          x: dayjs.unix(asset.x).format('YYYY-MM-DD HH:mm:ss'),
-          y: asset.y.toFixed(2) / 1000000 + ' USDC',
-        })
-        return {
-          x: new Date(asset.x * 1000).toLocaleString(),
-          y: asset.y.toFixed(2) / 1000000,
-        }
-      })
+    if (newDataFormat.length > 0) {
+      setIsShowing(true)
     }
-  }, [memoizedMorphoData, morphoData])
+  }, [newDataFormat])
 
+  console.log(newDataFormat)
   return (
-    <>
-      <div className="w-screen h-screen flex items-center justify-center">
-        <TypeAnimation
-          sequence={[
-            'Welcome to',
-            1000,
-            `🤑 Billy's House!`,
-            2000,
-            'Coming soon ...',
-            5000,
-            () => {
-              console.log('Sequence completed')
-            },
-          ]}
-          wrapper="span"
-          cursor={true}
-          repeat={Infinity}
-          className="!text-4xl sm:text-6xl font-bold text-center"
-        />
+    <div className="w-screen h-screen flex items-center justify-center">
+      <div className="border rounded p-10 w-5/12 h-2/5">
+        {isShowing ? (
+          <HistoricalBalanceChart
+            newDataFormat={newDataFormat}
+            minYValue={minYValue}
+          />
+        ) : (
+          <div className="flex justify-center items-center h-full font-mono">
+            Loading...
+          </div>
+        )}
       </div>
-    </>
+      <div className="border rounded p-10 w-2/12 h-2/12">
+        {isShowing ? (
+          <div className="text-center font-mono font-semibold text-lg">
+            Current Balance
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-full font-mono">
+            Loading...
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
