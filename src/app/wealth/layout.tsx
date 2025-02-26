@@ -1,5 +1,5 @@
-const layout = (props: any) => {
-  return <div className="p-28 w-screen h-screen">{props.children}</div>
+const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+  return <div className="p-28 w-screen h-screen">{children}</div>
 }
 
 export default layout
