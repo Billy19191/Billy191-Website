@@ -132,9 +132,10 @@ export default function WealthPage() {
   // console.log(newDataFormat)
   return (
     <div className="h-full">
-      <div className="text-center font-mono text-xl font-semibold">{`--- Billy191's Balance ---`}</div>
-      <div className="font-mono w-full h-full flex items-center justify-center gap-x-10">
-        <div className="border rounded p-10 w-5/12 h-2/5">
+      <div className="text-center font-mono text-xl font-semibold mt-4 mb-12">{`Billy191's Balance`}</div>
+
+      <div className="flex flex-col lg:flex-row font-mono w-full h-fit lg:h-full items-center justify-center gap-x-10">
+        <div className="lg:border rounded p-10 w-screen lg:w-5/12 h-72 lg:h-96">
           {isShowing ? (
             <HistoricalBalanceChart
               newDataFormat={newDataFormat}
@@ -146,8 +147,8 @@ export default function WealthPage() {
             </div>
           )}
         </div>
-        <div className="w-2/12 flex flex-col gap-y-10 ">
-          <div className="border rounded p-10  h-2/12">
+        <div className="w-screen lg:w-2/12 flex flex-col lg:gap-y-10 ">
+          <div className="lg:border rounded p-10 h-2/12">
             {isShowing ? (
               <div className="text-center font-mono font-semibold text-lg">
                 <CurrentBalanceBox currentBalance={currentBalance} />
@@ -158,7 +159,7 @@ export default function WealthPage() {
               </div>
             )}
           </div>
-          <div className="border rounded p-10  h-2/12">
+          <div className="lg:border rounded p-10 h-2/12">
             {isShowing ? (
               <div className="text-center font-mono font-semibold text-lg">
                 <TodayPNLBox
