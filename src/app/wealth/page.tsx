@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import HistoricalBalanceChart from '../(components)/HistoricalBalanceChart'
 import CurrentBalanceBox from '../(components)/CurrentBalanceBox'
+import TodayPNLBox from '../(components)/TodayPNLBox'
 
 type morphoDataInterface = {
   userByAddress: {
@@ -44,7 +45,7 @@ export default function WealthPage() {
   const [morphoData, setMorphoData] = useState<morphoDataInterface | undefined>(
     undefined
   )
-  const [isShowing, setIsShowing] = useState(false)
+  const [isShowing, setIsShowing] = useState<boolean>(false)
 
   const { data, loading, error } = useHistoricalGraphQL({
     startTimestamp: dayjs().subtract(1, 'month').unix(),
@@ -91,31 +92,87 @@ export default function WealthPage() {
     return morphoData.userByAddress.vaultPositions[1]?.assets / 1000000
   }, [morphoData])
 
+  const pnlUsd = useMemo(() => {
+    for (let i = 0; i < newDataFormat.length; i++) {
+      if (
+        dayjs
+          .unix(
+            morphoData?.userByAddress.vaultPositions[1]?.historicalState.assets[
+              i
+            ].x || 0
+          )
+          .isSame(dayjs(), 'day') &&
+        dayjs
+          .unix(
+            morphoData?.userByAddress.vaultPositions[1]?.historicalState.assets[
+              i + 1
+            ].x || 0
+          )
+          .isSame(dayjs().subtract(1, 'day'), 'day')
+      ) {
+        const currentPnlValue =
+          ((morphoData?.userByAddress?.vaultPositions[1]?.assets ?? 0) -
+            (morphoData?.userByAddress?.vaultPositions[1]?.historicalState
+              ?.assets[i + 1]?.y || 0)) /
+          1000000
+        const currentLatestDate = dayjs
+          .unix(
+            morphoData?.userByAddress?.vaultPositions[1]?.historicalState
+              ?.assets[i + 1]?.x || 0
+          )
+          .format('DD MMM HH:mm')
+        return { currentPnlValue, currentLatestDate }
+      }
+    }
+    return {
+      currentPnlValue: 0,
+      currentLatestDate: '',
+    }
+  }, [morphoData, newDataFormat.length])
   // console.log(newDataFormat)
   return (
-    <div className="w-screen h-screen flex items-center justify-center gap-x-10">
-      <div className="border rounded p-10 w-5/12 h-2/5">
-        {isShowing ? (
-          <HistoricalBalanceChart
-            newDataFormat={newDataFormat}
-            minYValue={minYValue}
-          />
-        ) : (
-          <div className="flex justify-center items-center h-full font-mono animate-slowfade">
-            Loading...
+    <div className="h-full">
+      <div className="text-center font-mono text-xl font-semibold">{`--- Billy191's Balance ---`}</div>
+      <div className="font-mono w-full h-full flex items-center justify-center gap-x-10">
+        <div className="border rounded p-10 w-5/12 h-2/5">
+          {isShowing ? (
+            <HistoricalBalanceChart
+              newDataFormat={newDataFormat}
+              minYValue={minYValue}
+            />
+          ) : (
+            <div className="flex justify-center items-center h-full font-mono animate-slowfade">
+              Loading...
+            </div>
+          )}
+        </div>
+        <div className="w-2/12 flex flex-col gap-y-10 ">
+          <div className="border rounded p-10  h-2/12">
+            {isShowing ? (
+              <div className="text-center font-mono font-semibold text-lg">
+                <CurrentBalanceBox currentBalance={currentBalance} />
+              </div>
+            ) : (
+              <div className="flex justify-center items-center font-mono">
+                Loading...
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      <div className="border rounded p-10 w-2/12 h-2/12">
-        {isShowing ? (
-          <div className="text-center font-mono font-semibold text-lg">
-            <CurrentBalanceBox currentBalance={currentBalance} />
+          <div className="border rounded p-10  h-2/12">
+            {isShowing ? (
+              <div className="text-center font-mono font-semibold text-lg">
+                <TodayPNLBox
+                  pnlUsd={pnlUsd.currentPnlValue}
+                  latestUpdate={pnlUsd.currentLatestDate}
+                />
+              </div>
+            ) : (
+              <div className="flex justify-center items-center font-mono">
+                Loading...
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="flex justify-center items-center font-mono">
-            Loading...
-          </div>
-        )}
+        </div>
       </div>
     </div>
   )

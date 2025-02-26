@@ -1,10 +1,10 @@
-const UsdcIcon = () => (
+const UsdcIcon = ({ size }: { size: number }) => (
   <svg
     data-name="86977684-12db-4850-8f30-233a7c267d11"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 2000 2000"
     // className="w-3 h-3"
-    style={{ width: '24px', height: 'auto' }}
+    style={{ width: size + 'px', height: 'auto' }}
   >
     <path
       d="M1000 2000c554.17 0 1000-445.83 1000-1000S1554.17 0 1000 0 0 445.83 0 1000s445.83 1000 1000 1000z"
