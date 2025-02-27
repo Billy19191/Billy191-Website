@@ -137,8 +137,9 @@ export default function WealthPage() {
   // console.log(newDataFormat)
   return (
     <div className="h-full">
-      <div className="text-center font-mono text-xl font-semibold mt-4 mb-6">{`Billy191's Balance`}</div>
-
+      <div className="text-center font-mono text-xl font-semibold mt-4 mb-6">
+        Billy191's Portfolio
+      </div>
       <div className="flex flex-col lg:flex-row font-mono w-full h-fit lg:h-full items-center justify-center gap-x-10">
         <div className="lg:border rounded px-10 py-6 lg:p-10 w-screen lg:w-5/12 h-72 lg:h-96">
           {isShowing ? (
